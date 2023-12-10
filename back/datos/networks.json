@@ -1,4 +1,5 @@
-[{
+[
+    {
     "id":"net1",
     "chainId":777888,
     "subnet":"172.16.238.0/24",
@@ -20,6 +21,39 @@
         },
         {
             "ip": "172.16.238.4",
+            "type":"normal",
+            "name":"normal"
+        }
+    ]
+},
+{
+    "id":"net3",
+    "chainId":777889,
+    "subnet":"172.16.240.0/24",
+    "ipBootnode":"172.16.240.20",
+    "alloc":[
+        "C077193960479a5e769f27B1ce41469C89Bec299"
+    ],
+    "nodos":[
+        {
+            "type":"rpc",
+            "name":"rpc1",
+            "ip": "172.16.240.2",
+            "port":9545
+        },
+        {
+            "type":"rpc",
+            "name":"rpc2",
+            "ip": "172.16.240.21",
+            "port":9546
+        },
+        {
+            "type":"miner",
+            "name":"miner1",
+            "ip": "172.16.240.3"
+        },
+        {
+            "ip": "172.16.240.4",
             "type":"normal",
             "name":"normal"
         }
