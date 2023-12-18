@@ -139,5 +139,34 @@
                 "port": ""
             }
         ]
+    },
+    {
+        "id": "net1prueba",
+        "chainId": 777888,
+        "subnet": "172.16.238.0/24",
+        "ipBootnode": "172.16.238.20",
+        "alloc": [
+            "C077193960479a5e769f27B1ce41469C89Bec299"
+        ],
+        "nodos": [
+            {
+                "type": "rpc",
+                "name": "rpc",
+                "ip": "172.16.238.2",
+                "port": 8545
+            },
+            {
+                "type": "miner",
+                "name": "miner1",
+                "ip": "172.16.238.3",
+                "port": ""
+            },
+            {
+                "ip": "172.16.238.4",
+                "type": "normal",
+                "name": "normal",
+                "port": ""
+            }
+        ]
     }
 ]

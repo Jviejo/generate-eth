@@ -25,7 +25,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           <Route path="down" element={<NetDown />} />
           <Route path="faucet" element={<Faucet />} />
           <Route path="transfer" element={<Transfer />} />
-          <Route path="bloques" element={<Bloques />} />
+          <Route path="blocks" element={<Bloques />} />
         </Route>
       </Route>
     </Routes>

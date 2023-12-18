@@ -1,9 +1,12 @@
 
 import React, { useState, useEffect } from "react";
-
+import { set } from "react-hook-form";
+import { useParams } from "react-router-dom";
 
 function Faucet() {
   const [account, setAccount] = useState(null);
+  const [tx, setTx] = useState(null); // [tx, setTx
+  const params = useParams();
   useEffect(() => {
     const ethereum = window.ethereum;
 
@@ -26,10 +29,10 @@ function Faucet() {
     }
   }, []);
   async function send(amount) {
-    fetch(`http://localhost:3000/faucetaccount=${account}&amount=${amount}`)
+    fetch(`http://localhost:3000/faucet/${params.id}/${account}/${amount}`)
       .then((response) => {
         response.json().then((data) => {
-          console.log(data);
+          setTx(data);
         });
       })
       .catch((error) => {
@@ -45,6 +48,7 @@ function Faucet() {
         <button className="btn btn-primary" onClick={() => {send(0.1)}}>
           Solicitar
         </button>
+        <p>{tx ? <pre>Transaction: {JSON.stringify(tx,null, 4)}</pre> : <p>Transaction: No hay transacción</p>}</p>
       </div>
     </div>
   );

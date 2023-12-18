@@ -354,13 +354,13 @@ app.get('/faucet/:net/:account/:amount', async (req, res) => {
     const tx = await signer.sendTransaction({
         from: address,
         to: account,
-        value: ethers.parseEther(amount)
+        value: ethers.parseUnits(amount,18)
     });
     // devolvemos la transaccion
-    res.send(tx.hash);
+    res.send({hash:tx});
 })
 
-app.get('/bloques/:net/', async (req, res) => {
+app.get('/blocks/:net/', async (req, res) => {
     const { net } = req.params
     // obtenemos la red
     const networks = JSON.parse(fs.readFileSync('./datos/networks.json').toString())
@@ -402,7 +402,9 @@ app.get('/isAlive/:net/', async (req, res) => {
     const port = network.nodos.find(i => i.type == 'rpc').port
     // creamos el provider 
     try {
-        const provider = new ethers.JsonRpcProvider(`http://localhost:${port}`);
+        const provider = new ethers.JsonRpcProvider(`http://localhost:${port}`)
+        .connect();
+        const blockNumber = await provider.getBlockNumber();
         res.send({ alive: true })
     } catch (error) {
         res.send({ alive: false })

@@ -21,6 +21,7 @@ function Operaciones() {
         <Link to="transfer">transfer</Link>
         <Link to="up">up</Link>
         <Link to="down">down</Link>
+        <Link to="blocks">blocks</Link>
       </div>
       <h3 className="mt-4">Datos de la red</h3>
       <table className="table">
