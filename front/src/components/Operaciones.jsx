@@ -22,6 +22,10 @@ function Operaciones() {
         <Link to="up">up</Link>
         <Link to="down">down</Link>
         <Link to="blocks">blocks</Link>
+        <form className="d-flex gap-2">
+          <input className="form-control" size={60} type="text" placeholder="search by address/Txn hash/Block" />
+          <button className="btn btn-primary form-control" type="submit">Search</button>
+        </form>
       </div>
       <h3 className="mt-4">Datos de la red</h3>
       <table className="table">
@@ -42,7 +46,6 @@ function Operaciones() {
           </tr>
         </tbody>
       </table>
-
       <Outlet />
     </div>
   );
