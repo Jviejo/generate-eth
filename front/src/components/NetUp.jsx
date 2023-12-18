@@ -17,7 +17,7 @@ function NetUp() {
     <div>
       <h4>NetUp</h4>
       <p>To start the network press buttom</p>
-      <p><IsAlive id={params.id} /></p>
+    
       <button className="btn btn-primary" onClick={() => up()}>
         Up
       </button>

@@ -1,27 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import IsAlive from "./IsAlive";
 
 function ListNetworks() {
-  let networks1 = [
-    {
-      id: "net1",
-      chain: 777888,
-      subnet: "192.168.1.0/24",
-      bootnode: "192.168.1.1",
-    },
-    {
-      id: "net2",
-      chain: 777889,
-      subnet: "192.168.2.0/24",
-      bootnode: "192.168.2.1",
-    },
-    {
-      id: "net3",
-      chain: 777890,
-      subnet: "192.168.3.0/24",
-      bootnode: "192.168.3.0",
-    },
-  ];
+  
   const [networks, setNetworks] = useState([]);
   useEffect(() => {
     fetch("http://localhost:3000").then((response) => {
@@ -38,6 +20,7 @@ function ListNetworks() {
         <thead>
           <tr>
             <th></th>
+            <th>status</th>
             <th>id</th>
             <th>chain</th>
             <th>subnet</th>
@@ -50,10 +33,9 @@ function ListNetworks() {
               <td>
                 <Link to={`/net/${net.id}/edit`}>Edit </Link>
                 <span className="mr-3">|</span>
-                <Link to={`/net/${net.id}/display`}>View</Link>
-                <span className="mr-3">|</span>
                 <Link to={`/net/${net.id}/operaciones`}>Operaciones</Link>
               </td>
+              <td><IsAlive id={net.id}></IsAlive></td>
               <td>{net.id}</td>
               <td>{net.chain}</td>
               <td>{net.subnet}</td>

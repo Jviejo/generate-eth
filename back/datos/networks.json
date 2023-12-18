@@ -12,17 +12,19 @@
                 "type": "rpc",
                 "name": "rpc",
                 "ip": "172.16.238.2",
-                "port": 8545
+                "port": "2222"
             },
             {
                 "type": "miner",
                 "name": "miner1",
-                "ip": "172.16.238.3"
+                "ip": "172.16.238.3",
+                "port": ""
             },
             {
                 "ip": "172.16.238.4",
                 "type": "normal",
-                "name": "normal"
+                "name": "normal",
+                "port": ""
             }
         ]
     },
@@ -66,7 +68,7 @@
                 "type": "rpc",
                 "name": "rpc",
                 "ip": "172.16.238.2",
-                "port": 8545
+                "port": "5555"
             },
             {
                 "type": "miner",
@@ -95,7 +97,7 @@
                 "type": "rpc",
                 "name": "rpc",
                 "ip": "172.16.238.2",
-                "port": 8545
+                "port": "4455"
             },
             {
                 "type": "miner",
@@ -124,7 +126,7 @@
                 "type": "rpc",
                 "name": "rpc",
                 "ip": "172.16.238.2",
-                "port": 8545
+                "port": "4433"
             },
             {
                 "type": "miner",

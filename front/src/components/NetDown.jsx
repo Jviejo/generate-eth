@@ -14,7 +14,7 @@ function NetDown() {
       <div>
         <h4>NetDown</h4>  
         <p>To stop the network press buttom</p>
-        <p><IsAlive id={params.id} /></p>
+
         <button className="btn btn-primary" onClick={() => up()}>Down</button>
       </div>
     );

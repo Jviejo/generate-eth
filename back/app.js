@@ -402,10 +402,10 @@ app.get('/isAlive/:net/', async (req, res) => {
     const port = network.nodos.find(i => i.type == 'rpc').port
     // creamos el provider 
     try {
-        const provider = new ethers.JsonRpcProvider(`http://localhost:${port}`)
-        .connect();
+        const provider = new ethers.JsonRpcProvider(`http://localhost:${port}`,
+        );
         const blockNumber = await provider.getBlockNumber();
-        res.send({ alive: true })
+        res.send({ alive: true , blockNumber})
     } catch (error) {
         res.send({ alive: false })
     }

@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import IsAlive from "./IsAlive";
 function Operaciones() {
   const [network, setNetwork] = useState([]);
   const { id } = useParams();
@@ -27,7 +28,7 @@ function Operaciones() {
           <button className="btn btn-primary form-control" type="submit">Search</button>
         </form>
       </div>
-      <h3 className="mt-4">Datos de la red</h3>
+      <h3 className="mt-4">Datos de la red <IsAlive id={id} /></h3>
       <table className="table">
         <thead>
           <tr>
