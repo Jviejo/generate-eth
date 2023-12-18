@@ -1,37 +1,41 @@
+import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
-function InputText({ name, label, help, register }) {
-  return (
-    <div className="mb-3">
-      <label className="form-label">{label}</label>
-      <input
-        type="text"
-        className="form-control"
-        aria-describedby="emailHelp"
-        {...register(name, { required: true })}
-      />
-    </div>
-  );
-}
+import { useParams } from "react-router-dom";
+import InputText from "./InputText";
 
 function AddNetwork() {
-  let registro = {
-    id: "net1",
-    chainId: 777888,
-    subnet: "11",
-    ipBootnode: "33",
-    alloc: [
-      "C077193960479a5e769f27B1ce41469C89Bec299",
-      "C077193960479a5e769f27B1ce41469C89Bec299",
-    ],
-    nodos: [
-      {
-        type: "",
-        name: "",
-        ip: "",
-        port: 0,
-      },
-    ],
-  };
+  const params = useParams();
+  const [network, setNetwork] = useState(null);
+  let id = params.id;
+  useEffect(() => {
+    if (id) {
+      fetch(`http://localhost:3000/${id}`).then((response) => {
+        response.json().then((data) => {
+          console.log(data);
+          setNetwork(data);
+        });
+      }); 
+    } else {
+      setNetwork({
+        id: "",
+        chainId: 0,
+        subnet: "",
+        ipBootnode: "",
+        alloc: [
+          "C077193960479a5e769f27B1ce41469C89Bec299",
+        ],
+        nodos: [
+          {
+            type: "",
+            name: "",
+            ip: "",
+            port: 0,
+          },
+        ],
+      })
+    }
+  }, [id]);
+  
 
   const {
     register,
@@ -39,8 +43,9 @@ function AddNetwork() {
     handleSubmit,
     formState: { errors },
   } = useForm({
-    defaultValues: registro,
+    values: network,
   });
+
   const {
     fields: allocFields,
     append: allocAppend,
@@ -61,6 +66,18 @@ function AddNetwork() {
 
   const onSubmit = (data) => {
     console.log(data);
+    fetch("http://localhost:3000", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    }).then((response) => {
+      response.json().then((data) => {
+        console.log(data);
+      });
+    });
+
   };
 
   return (

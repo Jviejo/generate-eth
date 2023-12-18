@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 function ListNetworks() {
-  let networks = [
+  let networks1 = [
     {
       id: "net1",
       chain: 777888,
@@ -22,6 +22,14 @@ function ListNetworks() {
       bootnode: "192.168.3.0",
     },
   ];
+  const [networks, setNetworks] = useState([]);
+  useEffect(() => {
+    fetch("http://localhost:3000").then((response) => {
+      response.json().then((data) => {
+        setNetworks(data);
+      });
+    });
+  }, []);
   return (
     <div>
       <h1>List Networks</h1>
@@ -40,7 +48,7 @@ function ListNetworks() {
           {networks.map((net, index) => (
             <tr key={index}>
               <td>
-                <Link  to={`/net/${net.id}/edit`}>Edit </Link>
+                <Link to={`/net/${net.id}/edit`}>Edit </Link>
                 <span className="mr-3">|</span>
                 <Link to={`/net/${net.id}/display`}>View</Link>
                 <span className="mr-3">|</span>

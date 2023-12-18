@@ -9,6 +9,8 @@ import Operaciones from "./components/Operaciones.jsx";
 import Faucet from "./components/Faucet.jsx";
 import Transfer from "./components/Transfer.jsx";
 import Bloques from "./components/Bloques.jsx";
+import NetUp from "./components/NetUp.jsx";
+import NetDown from "./components/NetDown.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <BrowserRouter>
@@ -16,9 +18,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <Route path="/" element={<Home />}>
         <Route path="/net/add" element={<AddNetwork />} />
         <Route path="/net/list" element={<ListNetworks />} />
-        <Route path="/net/:net/display" element={<DisplayNetwork />} />
-        <Route path="/net/:net/edit" element={<AddNetwork />} />
-        <Route path="/net/:net/operaciones" element={<Operaciones />} >
+        <Route path="/net/:id/display" element={<DisplayNetwork />} />
+        <Route path="/net/:id/edit" element={<AddNetwork />} />
+        <Route path="/net/:id/operaciones" element={<Operaciones />} >
+          <Route path="up" element={<NetUp />} />
+          <Route path="down" element={<NetDown />} />
           <Route path="faucet" element={<Faucet />} />
           <Route path="transfer" element={<Transfer />} />
           <Route path="bloques" element={<Bloques />} />

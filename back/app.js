@@ -2,12 +2,15 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const app = express();
-const { execSync } = require("child_process");
+const cors = require('cors');
+const ethers = require('ethers');
+const { execSync, exec } = require("child_process");
 app.listen(3000, () => console.log('Listening on port 3000'));
 const port = 3000;
+app.use(cors());
+app.use(express.json());
 
 const networks = JSON.parse(fs.readFileSync('./datos/networks.json').toString())
-
 DIR_BASE = path.join(__dirname, 'datos')
 DIR_NETWORKS = path.join(DIR_BASE, 'networks')
 
@@ -65,14 +68,14 @@ function createGenesis(network) {
     // metemos la cuenta generada 
     network.alloc.push(fs.readFileSync(`${pathNetwork}/address.txt`).toString().trim())
     genesis.alloc = network.alloc.reduce((acc, i) => {
-        const cuenta = i.substring(0, 2) == '0x' ?  i.substring(2) : i
+        const cuenta = i.substring(0, 2) == '0x' ? i.substring(2) : i
         acc[cuenta] = { balance: "0xad78ebc5ac6200000" }
         return acc
     }, {})
 
     // cuenta que firma
     let cuenta = fs.readFileSync(`${pathNetwork}/address.txt`).toString()
-    cuenta = cuenta.substring(0, 2) == '0x' ?  cuenta.substring(2) : i
+    cuenta = cuenta.substring(0, 2) == '0x' ? cuenta.substring(2) : i
 
     genesis.extradata = "0x" + "0".repeat(64) + cuenta.trim() + "0".repeat(130)
     return genesis;
@@ -209,11 +212,11 @@ networks:
 }
 function createEnv(network) {
     const pathNetwork = path.join(DIR_NETWORKS, network.id)
-    let bootnode = 
-    `enode://${fs.readFileSync(`${pathNetwork}/bootnode`).toString()}@${network.ipBootnode}:0?discport=30301`    
+    let bootnode =
+        `enode://${fs.readFileSync(`${pathNetwork}/bootnode`).toString()}@${network.ipBootnode}:0?discport=30301`
     bootnode = bootnode.replace('\n', '')
     const file =
-`
+        `
 BOOTNODE=${bootnode}
 SUBNET=${network.subnet}
 IPBOOTNODE=${network.ipBootnode}
@@ -236,7 +239,20 @@ sh -c "geth account new --password /root/password.txt --datadir /root | grep 'of
 
 }
 
-app.get('/:id', async (req, res) => {
+app.get('/down/:id', async (req, res) => {
+    const { id } = req.params
+    const pathNetwork = path.join(DIR_NETWORKS, id)
+    if (!existsDir(pathNetwork))
+        res.status(404).send('No se ha encontrado la red')
+    else {
+        execSync(`docker-compose -f ${pathNetwork}/docker-compose.yml down`)
+        fs.rmdirSync(pathNetwork, { recursive: true })
+        res.send({id:id});
+    }
+
+})
+
+app.get('/up/:id', async (req, res) => {
     const { id } = req.params
 
     const network = networks.find(i => i.id == id)
@@ -259,7 +275,138 @@ app.get('/:id', async (req, res) => {
 
         fs.writeFileSync(`${pathNetwork}/docker-compose.yml`, createDockerCompose(network))
         fs.writeFileSync(`${pathNetwork}/.env`, createEnv(network))
+        console.log(`docker-compose -f ${pathNetwork}/docker-compose.yml up -d`)
+        execSync(`docker-compose -f ${pathNetwork}/docker-compose.yml up -d`)
         res.send(network);
     }
 }
 );
+
+app.get('/restart/:id', async (req, res) => {
+    const { id } = req.params
+    const pathNetwork = path.join(DIR_NETWORKS, id)
+    if (!existsDir(pathNetwork))
+        res.status(404).send('No se ha encontrado la red')
+    else {
+        execSync(`docker-compose -f ${pathNetwork}/docker-compose.yml restart`)
+        res.send('ok');
+    }
+
+});
+app.get('/', async (req, res) => {
+    res.send(JSON.parse(fs.readFileSync('./datos/networks.json').toString()));
+}
+);
+app.get('/:id', async (req, res) => {
+    const networks = JSON.parse(fs.readFileSync('./datos/networks.json').toString())
+    const network = networks.find(i => i.id == req.params.id)
+    if (!network)
+        res.status(404).send('No se ha encontrado la red')
+    else
+        res.send(network);
+}
+);
+
+// para cuando existe y para cuando no existe
+app.post('/', async (req, res) => {
+    const network = req.body
+    console.log(network)
+    const networks = JSON.parse(fs.readFileSync('./datos/networks.json').toString())
+    if (networks.find(i => i.id == network.id)){
+        networks[networks.findIndex(i => i.id == network.id)] = network
+        fs.writeFileSync('./datos/networks.json', JSON.stringify(networks, null, 4))
+        res.send(network);
+    }
+    else {
+        networks.push(network)
+        fs.writeFileSync('./datos/networks.json', JSON.stringify(networks, null, 4))
+        res.send(network);
+    }
+});
+
+app.get('/faucet/:net/:account/:amount', async (req, res) => {
+    // los parametros son la red, la cuenta y la cantidad
+    const { account, net, amount } = req.params
+    // obtenemos la red
+    const networks = JSON.parse(fs.readFileSync('./datos/networks.json').toString())
+    const network = networks.find(i => i.id == net)
+    // si no existe not data found
+    if (!network) {
+        res.status(404).send('No se ha encontrado la red');
+        return;
+    }
+    // obtenemos el directorio donde esta y los datos de la password la cuenta
+    const pathNetwork = path.join(DIR_NETWORKS, network.id)
+    const address = fs.readFileSync(`${pathNetwork}/address.txt`).toString().trim()
+    const password = fs.readFileSync(`${pathNetwork}/password.txt`).toString().trim()
+    const files = fs.readdirSync(`${pathNetwork}/keystore`)
+    // obtenemos el port del rpc
+    const port = network.nodos.find(i => i.type == 'rpc').port
+    // creamos el provider y el signer
+    const provider = new ethers.JsonRpcProvider(`http://localhost:${port}`);
+    // leemos la clave privada para hacer un wallet
+    const json = fs.readFileSync(path.join(pathNetwork, 'keystore', files[0])).toString()
+    const wallet = await ethers.Wallet.fromEncryptedJson(
+        json, password);
+    // creamos el signer a partir del wallet y del provider
+    const signer = wallet.connect(provider);
+    // enviamos la cantidad a la cuenta
+    const tx = await signer.sendTransaction({
+        from: address,
+        to: account,
+        value: ethers.parseEther(amount)
+    });
+    // devolvemos la transaccion
+    res.send(tx.hash);
+})
+
+app.get('/bloques/:net/', async (req, res) => {
+    const { net } = req.params
+    // obtenemos la red
+    const networks = JSON.parse(fs.readFileSync('./datos/networks.json').toString())
+    const network = networks.find(i => i.id == net)
+    // si no existe not data found
+    if (!network) {
+        res.status(404).send('No se ha encontrado la red');
+        return;
+    }
+    // obtenemos el directorio donde esta y los datos de la password la cuenta
+    const pathNetwork = path.join(DIR_NETWORKS, network.id)
+    // obtenemos el port del rpc
+    const port = network.nodos.find(i => i.type == 'rpc').port
+    // creamos el provider 
+    const provider = new ethers.JsonRpcProvider(`http://localhost:${port}`);
+
+    const blockNumber = await provider.getBlockNumber();
+    let promises = [];
+    for (let i = blockNumber - 10; i < blockNumber; i++) {
+        promises.push(provider.getBlock(i));
+    }
+    const blocks = await Promise.all(promises);
+    res.send(blocks);
+})
+
+app.get('/isAlive/:net/', async (req, res) => {
+    const { net } = req.params
+    // obtenemos la red
+    const networks = JSON.parse(fs.readFileSync('./datos/networks.json').toString())
+    const network = networks.find(i => i.id == net)
+    // si no existe not data found
+    if (!network) {
+        res.status(404).send('No se ha encontrado la red');
+        return;
+    }
+    // obtenemos el directorio donde esta y los datos de la password la cuenta
+    const pathNetwork = path.join(DIR_NETWORKS, network.id)
+    // obtenemos el port del rpc
+    const port = network.nodos.find(i => i.type == 'rpc').port
+    // creamos el provider 
+    try {
+        const provider = new ethers.JsonRpcProvider(`http://localhost:${port}`);
+        res.send({ alive: true })
+    } catch (error) {
+        res.send({ alive: false })
+    }
+
+    
+})
